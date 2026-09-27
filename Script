@@ -1,0 +1,101 @@
+-- Speed Hub Mini (Steal an Egg - Mobile Optimized)
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local StealBtn = Instance.new("TextButton")
+local SpeedBtn = Instance.new("TextButton")
+
+-- Защита от удаления GUI при перезагрузке
+ScreenGui.Parent = game:GetService("CoreGui")
+ScreenGui.Name = "SpeedHubEgg"
+
+-- Главная панель
+MainFrame.Name = "Main"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+MainFrame.Position = UDim2.new(0.35, 0, 0.3, 0)
+MainFrame.Size = UDim2.new(0, 220, 0, 170)
+MainFrame.Active = true
+MainFrame.Draggable = true -- Перетаскивание пальцем
+
+-- Заголовок
+Title.Parent = MainFrame
+Title.Size = UDim2.new(1, 0, 0, 35)
+Title.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+Title.Text = "SPEED HUB MINI"
+Title.TextColor3 = Color3.fromRGB(0, 255, 127)
+Title.TextSize = 16
+Title.Font = Enum.Font.SourceSansBold
+
+-- 1. Кнопка Auto Steal (Ярлык для кражи)
+StealBtn.Parent = MainFrame
+StealBtn.Position = UDim2.new(0.1, 0, 0.28, 0)
+StealBtn.Size = UDim2.new(0.8, 0, 0, 38)
+StealBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+StealBtn.Text = "Auto Steal: OFF"
+StealBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+StealBtn.Font = Enum.Font.SourceSansSemibold
+StealBtn.TextSize = 14
+
+-- 2. Кнопка Speed Boost (Ярлык ускорения)
+SpeedBtn.Parent = MainFrame
+SpeedBtn.Position = UDim2.new(0.1, 0, 0.6, 0)
+SpeedBtn.Size = UDim2.new(0.8, 0, 0, 38)
+SpeedBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+SpeedBtn.Text = "Speed Boost: OFF"
+SpeedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpeedBtn.Font = Enum.Font.SourceSansSemibold
+SpeedBtn.TextSize = 14
+
+-- ЛОГИКА ФУНКЦИЙ (Двигатель под ярлыками)
+local autoStealActive = false
+local speedActive = false
+
+-- Логика кражи яиц
+StealBtn.MouseButton1Click:Connect(function()
+    autoStealActive = not autoStealActive
+    if autoStealActive then
+        StealBtn.Text = "Auto Steal: ON"
+        StealBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 80)
+    else
+        StealBtn.Text = "Auto Steal: OFF"
+        StealBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    end
+end)
+
+-- Основной цикл авто-сбора (работает во всех зонах)
+task.spawn(function()
+    while task.wait(0.2) do
+        if autoStealActive then
+            pcall(function()
+                local player = game.Players.LocalPlayer
+                local character = player.Character or player.CharacterAdded:Wait()
+                
+                -- Поиск яиц на карте
+                for _, obj in pairs(workspace:GetDescendants()) do
+                    if obj:IsA("ProximityPrompt") and autoStealActive then
+                        -- Активация подбора без удержания
+                        fireproximityprompt(obj)
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+-- Логика ускорения
+SpeedBtn.MouseButton1Click:Connect(function()
+    speedActive = not speedActive
+    local player = game.Players.LocalPlayer
+    local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+    
+    if speedActive then
+        SpeedBtn.Text = "Speed Boost: ON"
+        SpeedBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 80)
+        if hum then hum.WalkSpeed = 32 end -- Стандартная скорость 16
+    else
+        SpeedBtn.Text = "Speed Boost: OFF"
+        SpeedBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        if hum then hum.WalkSpeed = 16 end
+    end
+end)
